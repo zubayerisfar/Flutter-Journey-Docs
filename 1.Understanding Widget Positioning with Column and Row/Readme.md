@@ -152,10 +152,25 @@ The text widgets are **aligned to the left side** of the screen! This is the def
 
 The `mainAxisAlignment` property controls how widgets are distributed along the **main axis**.
 
-For a **Column**, since the main axis is vertical:
+### **What is the Main Axis?**
+
+For a **Column**, the **main axis is vertical** because Column stores and arranges widgets vertically (from top to bottom). This is the primary direction in which Column lays out its children.
+
+For a **Row**, the **main axis is horizontal** because Row stores and arranges widgets horizontally (from left to right). This is the primary direction in which Row lays out its children.
+
+#### **For Column:**
+
+Since the main axis is vertical:
 
 - `mainAxisAlignment` controls the **vertical positioning** of children
 - It aligns all widgets from top to bottom
+
+#### **For Row:**
+
+Since the main axis is horizontal:
+
+- `mainAxisAlignment` controls the **horizontal positioning** of children
+- It aligns all widgets from left to right
 
 The key attributes are:
 
