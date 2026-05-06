@@ -32,6 +32,43 @@ Container
         └── Text (streak)
 ```
 
+### Understanding StatelessWidget and the build() Method
+
+Before we write code, let's understand a few key concepts:
+
+**What is a StatelessWidget?**
+
+- A `StatelessWidget` is a widget that doesn't change once it's created (immutable)
+- It's used for UI elements that don't need to update based on user interaction or state changes
+- Examples: Text, AppBar, Icon, etc.
+
+**Why do we override the build() method?**
+
+- The `build()` method tells Flutter **what to display on the screen**
+- It returns a widget (or widget tree) that describes the UI
+- Flutter calls this method automatically to render your widget
+
+**What is BuildContext?**
+
+- `BuildContext` is a reference to the location of a widget in the widget tree
+- It gives you access to theme, navigation, and other parent widget information
+- You pass it as a parameter because Flutter needs to know where to build the widget in the hierarchy
+
+**Example in the MyApp class:**
+
+```dart
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // context = knows where MyApp sits in the widget tree
+    // We return MaterialApp, which tells Flutter to display it
+    return MaterialApp(
+      home: Scaffold(...),
+    );
+  }
+}
+```
+
 ### Setting Up the App
 
 Let's start with the basic app structure and AppBar:
