@@ -295,8 +295,7 @@ class HabitTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.all(16),
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -386,3 +385,128 @@ This approach gives you several advantages:
 - **Reusability**: Create as many tiles as you need with different data
 - **Maintainability**: Update the design once, and it applies everywhere
 - **Clarity**: The code is organized and easy to understand
+
+Full Code:
+
+```dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Habit Tracker',
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text("Habit Tracker"),
+          centerTitle: true,
+          elevation: 2,
+        ),
+        body: Column(
+          children: [
+            HabitTile(
+              habitName: "Drinking Water",
+              progress: "Progress: 33%",
+              streak: "Streak: 2 days",
+              icon: Icons.local_drink,
+              tileColor: const Color.fromARGB(255, 218, 215, 215),
+            ),
+            HabitTile(
+              habitName: "Exercise",
+              progress: "Progress: 50%",
+              streak: "Streak: 5 days",
+              icon: Icons.fitness_center,
+              tileColor: const Color.fromARGB(255, 100, 200, 150),
+            ),
+            HabitTile(
+              habitName: "Reading",
+              progress: "Progress: 75%",
+              streak: "Streak: 10 days",
+              icon: Icons.book,
+              tileColor: const Color.fromARGB(255, 150, 150, 200),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HabitTile extends StatelessWidget {
+  final String habitName;
+  final String progress;
+  final String streak;
+  final IconData icon;
+  final Color tileColor;
+
+  const HabitTile({
+    super.key,
+    required this.habitName,
+    required this.progress,
+    required this.streak,
+    required this.icon,
+    required this.tileColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.all(16),
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: tileColor,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 100,
+                width: 100,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.white,
+                ),
+                child: Icon(icon, color: Colors.black, size: 50),
+              ),
+              SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    habitName,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 5),
+                  Text("1/3 Glasses", style: TextStyle(fontSize: 12)),
+                ],
+              ),
+            ],
+          ),
+          Column(
+            children: [
+              Text(
+                progress,
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10),
+              Text(streak, style: TextStyle(fontSize: 12)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+```
