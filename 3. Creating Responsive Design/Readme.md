@@ -1,4 +1,5 @@
 # Creating Responsive Design
+
 ![Target Image](images/target_image.png)
 
 ## Problem
@@ -72,56 +73,153 @@ class MyApp extends StatelessWidget {
 
 Instead of hardcoding each widget, we now have a `habitTiles` list that holds everything.
 
-### Step 2: Use OrientationBuilder to Check Orientation
+### Step 2: Check Orientation with MediaQuery
 
-Use `OrientationBuilder` and `MediaQuery` to detect if the phone is in portrait or landscape:
+Get the phone orientation at the start of your build method:
 
 ```dart
-child: OrientationBuilder(
-  builder: (context, orientation) {
-    final isPortrait =
-        MediaQuery.orientationOf(context) == Orientation.portrait;
+final isPortrait = MediaQuery.orientationOf(context) == Orientation.portrait;
+```
 
-    if (isPortrait) {
-      // Portrait mode: stack widgets vertically
-      return Column(spacing: 16, children: habitTiles);
-    }
+Then in your Column, use `if` statements with the spread operator (`...`) to conditionally show layouts:
+
+```dart
+child: Column(
+  spacing: 16,
+  children: [
+    // Portrait mode: show all widgets in a single column
+    if (isPortrait) ...habitTiles,
 
     // Landscape mode: show 2 widgets side-by-side
-    return Column(
-      spacing: 16,
-      children: [
-        for (var i = 0; i < habitTiles.length; i += 2)
-          Row(
-            spacing: 16,
-            children: [
-              Expanded(child: habitTiles[i]),
-              if (i + 1 < habitTiles.length)
-                Expanded(child: habitTiles[i + 1]),
-            ],
-          ),
-      ],
-    );
-  },
+    if (!isPortrait) ...[
+      for (var i = 0; i < habitTiles.length; i += 2)
+        Row(
+          spacing: 16,
+          children: [
+            Expanded(child: habitTiles[i]),
+            if (i + 1 < habitTiles.length)
+              Expanded(child: habitTiles[i + 1]),
+          ],
+        ),
+    ],
+  ],
 )
 ```
 
-### How the Landscape Layout Works
+What's happening here:
 
-The landscape layout pairs up widgets. Here's how the loop works:
+- `if (isPortrait) ...habitTiles` - spreads all widgets as individual items in the Column
+- `if (!isPortrait) ...[]` - creates pairs of widgets in Rows for landscape mode
+- The `...` spread operator unpacks the list into separate children
 
-- If you have 5 widgets: `[W1, W2, W3, W4, W5]`
-- Loop iteration 1 (i=0): Shows `Row(W1, W2)`
-- Loop iteration 2 (i=2): Shows `Row(W3, W4)`
-- Loop iteration 3 (i=4): Shows `W5` alone (because there's no W6)
+### Why This Approach is Cleaner
 
-The `i += 2` means we jump by 2 each time. The `if (i + 1 < habitTiles.length)` check prevents errors when you have an odd number of widgets - it makes sure we don't try to display a widget that doesn't exist.
+Instead of using `OrientationBuilder` (which adds an extra widget layer), we can check the orientation directly in the Column:
 
-The `Expanded` widget makes each tile take equal space in the row.
+- Gets orientation once with `MediaQuery.orientationOf(context)`
+- Uses `if` conditions with spread operator to conditionally render layouts
+- Simpler and more readable than nested builders
+- No extra widget nesting
 
 Result:
 
 ![Horizontal Proper Output](images/list_printing_horizontal.png)
+
+## Solution 3: Better Approach - Separate Layouts with Builders (Recommended)
+
+The previous solution works, but can be memory-inefficient for larger lists because it renders all widgets at once. A better approach is to:
+
+1. **Separate portrait and landscape into different layout widgets** - Makes code cleaner and easier to maintain
+2. **Use `ListView.builder` for portrait** - Only renders visible items, saves memory
+3. **Use `GridView.builder` for landscape** - Perfect for grid layouts, lazy-loads items
+
+### Why This is Better:
+
+- **Memory Efficient**: Builders only render items that are visible on screen (lazy loading)
+- **Better Performance**: Scrolling is smoother because fewer widgets are in the widget tree
+- **Scalable**: If you add 100+ items, the app won't slow down
+- **Cleaner Code**: Separates portrait and landscape logic into dedicated widgets
+- **Lazy Loading**: As user scrolls, new items are built only when needed
+
+### Step 1: Create Separate Layout Widgets
+
+Instead of using conditional logic in a Column, create dedicated widgets for each orientation:
+
+```dart
+class PotraitLayout extends StatelessWidget {
+  final List<Widget> habitTiles;
+
+  const PotraitLayout(this.habitTiles, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: habitTiles[index],
+        );
+      },
+      itemCount: habitTiles.length,
+    );
+  }
+}
+
+class LandscapeLayout extends StatelessWidget {
+  final List<Widget> habitTiles;
+
+  const LandscapeLayout(this.habitTiles, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cardwidth = MediaQuery.of(context).size.width / 2 - 32;
+    return GridView.builder(
+      padding: const EdgeInsets.all(16.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: cardwidth / 100,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      itemCount: habitTiles.length,
+      itemBuilder: (context, index) {
+        return habitTiles[index];
+      },
+    );
+  }
+}
+```
+
+### Step 2: Check Orientation and Return Appropriate Layout
+
+In your main build method, check the orientation and return the correct layout:
+
+```dart
+final isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+
+return MaterialApp(
+  // ... theme setup ...
+  home: Scaffold(
+    appBar: AppBar(title: Text("Habit Tracker")),
+    body: SafeArea(
+      bottom: false,
+      child: isLandscape
+          ? LandscapeLayout(habitTiles)
+          : PotraitLayout(habitTiles),
+    ),
+  ),
+);
+```
+
+### Key Improvements:
+
+| Feature        | Old Approach                | New Approach                      |
+| -------------- | --------------------------- | --------------------------------- |
+| Memory Usage   | Renders all items at once   | Only visible items (lazy loading) |
+| Scrolling      | Can be slow with many items | Smooth scrolling                  |
+| Code Structure | Mixed in one Column         | Separated into clear widgets      |
+| Scalability    | Poor for 100+ items         | Excellent for any number          |
 
 ## Step 3: Add Dark Mode
 
@@ -212,7 +310,9 @@ class MyApp extends StatelessWidget {
       ),
     ];
 
-    return MaterialApp(
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Habit Tracker',
@@ -241,35 +341,55 @@ class MyApp extends StatelessWidget {
         appBar: AppBar(title: Text("Habit Tracker")),
         body: SafeArea(
           bottom: false,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(16),
-            child: OrientationBuilder(
-              builder: (context, orientation) {
-                final isPortrait =
-                    MediaQuery.orientationOf(context) == Orientation.portrait;
-                if (isPortrait) {
-                  return Column(spacing: 16, children: habitTiles);
-                }
-
-                return Column(
-                  spacing: 16,
-                  children: [
-                    for (var i = 0; i < habitTiles.length; i += 2)
-                      Row(
-                        spacing: 16,
-                        children: [
-                          Expanded(child: habitTiles[i]),
-                          if (i + 1 < habitTiles.length)
-                            Expanded(child: habitTiles[i + 1]),
-                        ],
-                      ),
-                  ],
-                );
-              },
-            ),
-          ),
+          child: isLandscape
+              ? LandscapeLayout(habitTiles)
+              : PotraitLayout(habitTiles),
         ),
       ),
+    );
+  }
+}
+
+class PotraitLayout extends StatelessWidget {
+  final List<Widget> habitTiles;
+
+  const PotraitLayout(this.habitTiles, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(16.0),
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: habitTiles[index],
+        );
+      },
+      itemCount: habitTiles.length,
+    );
+  }
+}
+
+class LandscapeLayout extends StatelessWidget {
+  final List<Widget> habitTiles;
+
+  const LandscapeLayout(this.habitTiles, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final cardwidth = MediaQuery.of(context).size.width / 2 - 32;
+    return GridView.builder(
+      padding: const EdgeInsets.all(16.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: cardwidth / 100,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+      ),
+      itemCount: habitTiles.length,
+      itemBuilder: (context, index) {
+        return habitTiles[index];
+      },
     );
   }
 }
@@ -292,52 +412,51 @@ class HabitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: tileColor,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Container(
-                height: 50,
-                width: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  color: Colors.white,
-                ),
-                child: Icon(icon, color: Colors.black),
-              ),
-              SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    habitName,
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return Card(
+      color: tileColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  height: 50,
+                  width: 50,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.white,
                   ),
-                  SizedBox(height: 5),
-                  Text("1/3 Glasses", style: TextStyle(fontSize: 12)),
-                ],
-              ),
-            ],
-          ),
-          Column(
-            children: [
-              Text(
-                progress,
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              Text(streak, style: TextStyle(fontSize: 12)),
-            ],
-          ),
-        ],
+                  child: Icon(icon, color: Colors.black),
+                ),
+                SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      habitName,
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 5),
+                    Text("1/3 Glasses", style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ],
+            ),
+            Column(
+              children: [
+                Text(
+                  progress,
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 10),
+                Text(streak, style: TextStyle(fontSize: 12)),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
