@@ -11,7 +11,7 @@ Implicit animations in Flutter are widgets that automatically animate when their
 ### 1. **Button Animation** (`button_animation.dart`)
 
 **Video**: 
-[Button Animation](assets/button_animation.gif)
+![Button Animation](assets/button_animation.gif)
 
 
 #### What It Does:
@@ -57,7 +57,7 @@ onPressed: () {
 ### 2. **Container Animation** (`container_animation.dart`)
 **Video**: 
 
-[Container Animation](assets/container_animation.gif)
+![Container Animation](assets/container_animation.gif)
 
 
 #### What It Does:
@@ -99,7 +99,7 @@ AnimatedContainer(
 
 ### 3. **Pulsating Animation** (`pulsating_animation.dart`)
 **Video**:
-[Pulsating Animation](assets/pulsating_animation.gif)
+![Pulsating Animation](assets/pulsating_animation.gif)
 
 
 #### What It Does:
@@ -145,7 +145,7 @@ TweenAnimationBuilder(
 
 ### 4. **Tap & Drag Animation** (`tap_drag_animation.dart`)
 **Video**:
-[Tap and Drag Animation](assets/tap_and_drag_animation.gif)
+![Tap and Drag Animation](assets/tap_and_drag_animation.gif)
 
 
 #### What It Does:
