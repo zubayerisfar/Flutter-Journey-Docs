@@ -145,7 +145,7 @@ TweenAnimationBuilder(
 
 ### 4. **Tap & Drag Animation** (`tap_drag_animation.dart`)
 **Video**:
-![Tap and Drag Animation](assets/tap_and_drag_animation.gif)
+![Tap and Drag Animation](assets/pan_drag_animation.gif)
 
 
 #### What It Does:
