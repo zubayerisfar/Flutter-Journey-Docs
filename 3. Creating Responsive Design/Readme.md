@@ -190,6 +190,13 @@ class LandscapeLayout extends StatelessWidget {
   }
 }
 ```
+`childAspectRatio` is the width-to-height ratio of each grid cell — it tells the grid how tall to make each item relative to its width (width / height).
+In this code:
+```dart
+childAspectRatio: cardwidth / 100
+```
+
+`cardwidth` is the calculated width of each cell (screenWidth / 2 - 32, accounting for the grid's outer padding and cross-axis spacing). Dividing it by 100 means: "make each cell's height such that the ratio `width : height` equals `cardwidth : 100`" — basically, forcing each cell to be 100 logical pixels tall, whatever the width turns out to be.
 
 ### Step 2: Check Orientation and Return Appropriate Layout
 
